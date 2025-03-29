@@ -1,8 +1,6 @@
 lpips==0.1.4
 matplotlib
-torch==2.0.1+cu118
-torchvision==0.15.2+cu118
-torchaudio==2.0.2+cu118
+torch==2.6.0
 monai[nibabel]==1.2.0
 monai-generative
 pandas
