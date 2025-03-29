@@ -52,8 +52,8 @@ torchrun --nproc_per_node=2 --nnodes=1 --node_rank=0 \
 train_ddpm.py \
 --output_dir=${output_root} \
 --model_name=mnist \
---training_ids=${data_root}/data_splits/FashionMNIST_train.csv \
---validation_ids=${data_root}/data_splits/FashionMNIST_val.csv \
+--training_ids=${data_root}/data_splits/MNIST_train.csv \
+--validation_ids=${data_root}/data_splits/MNIST_val.csv \
 --is_grayscale=1 \
 --n_epochs=300 \
 --beta_schedule=scaled_linear_beta \
@@ -67,9 +67,9 @@ train_ddpm.py \
 python reconstruct.py \
 --output_dir=${output_root} \
 --model_name=mnist \
---validation_ids=${data_root}/data_splits/FashionMNIST_val.csv \
---in_ids=${data_root}/data_splits/FashionMNIST_test.csv \
---out_ids=${data_root}/data_splits/MNIST_test.csv,${data_root}/data_splits/FashionMNIST_vflip_test.csv,${data_root}/data_splits/FashionMNIST_hflip_test.csv \
+--validation_ids=${data_root}/data_splits/MNIST_val.csv \
+--in_ids=${data_root}/data_splits/MNIST_test.csv \
+--out_ids=${data_root}/data_splits/MNIST_test.csv,${data_root}/data_splits/MNIST_vflip_test.csv,${data_root}/data_splits/MNIST_hflip_test.csv \
 --is_grayscale=1 \
 --beta_schedule=scaled_linear_beta \
 --beta_start=0.0015 \
