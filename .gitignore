@@ -1,0 +1,11 @@
+# Ignore the dataset directory
+dataset/
+
+# Ignore the contents of the models directory
+models/
+
+# Ignore the environment directory
+env/
+
+# Ignore python cache files
+*/__pycache__/
