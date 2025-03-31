@@ -43,7 +43,7 @@ def select_first_channel(x):
     return x[0, None, ...]
 
 # Fixes issue with seed out of bounds
-set_determinism(seed=64)
+set_determinism(seed=2)
 
 def get_training_data_loader(
     batch_size: int,
