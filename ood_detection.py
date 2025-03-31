@@ -97,8 +97,6 @@ def main(args):
         out_data = ("FashionMNIST", "MNIST_vflip", "MNIST_hflip")
     elif "cifar10" in model:
         out_data = ("SVHN", "CelebA", "CIFAR10_vflip", "CIFAR10_hflip")
-    elif "celeba" in model.lower():
-        out_data = ("CIFAR10", "SVHN", "CelebA_vflip", "CelebA_hflip")
     elif "svhn" in model:
         out_data = ("CIFAR10", "CelebA", "SVHN_vflip", "SVHN_hflip")
     elif "abdomenct" in model:
@@ -191,6 +189,7 @@ def main(args):
                     alpha=0.3,
                 )
         plt.show()
+        
         # calculate ROC scores
         # in-distribution scores/class
         all_scores = results_df_mean.loc[results_df_mean["type"] == "in"][[target]].values.tolist()
