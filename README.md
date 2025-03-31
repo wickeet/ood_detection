@@ -28,16 +28,7 @@ To use your own data, you just need to provide separate csvs containing paths fo
 Examples here use MNIST as the in-distribution dataset (no need for ``--output_dir`` argument).
 
 ```bash
-python train_ddpm.py \
---output_dir=${output_root} \
---model_name=mnist \
---training_ids=${data_root}/data_splits/MNIST_train.csv \
---validation_ids=${data_root}/data_splits/MNIST_val.csv \
---is_grayscale=1 \
---n_epochs=300 \
---beta_schedule=scaled_linear_beta \
---beta_start=0.0015 \
---beta_end=0.0195
+python train_ddpm.py --output_dir=${output_root} --model_name=mnist --training_ids=${data_root}/data_splits/MNIST_train.csv --validation_ids=${data_root}/data_splits/MNIST_val.csv --is_grayscale=1 --n_epochs=300 --beta_schedule=scaled_linear_beta --beta_start=0.0015 --beta_end=0.0195
 ```
 
 You can track experiments in tensorboard
@@ -45,40 +36,10 @@ You can track experiments in tensorboard
 tensorboard --logdir=${output_root}
 ```
 
-The code is DistributedDataParallel (DDP) compatible. To train on e.g. 2 GPUs:
-
-```bash
-torchrun --nproc_per_node=2 --nnodes=1 --node_rank=0 \
-train_ddpm.py \
---output_dir=${output_root} \
---model_name=mnist \
---training_ids=${data_root}/data_splits/MNIST_train.csv \
---validation_ids=${data_root}/data_splits/MNIST_val.csv \
---is_grayscale=1 \
---n_epochs=300 \
---beta_schedule=scaled_linear_beta \
---beta_start=0.0015 \
---beta_end=0.0195
-```
-
 ### Reconstruct data
 
 ```bash
-python reconstruct.py \
---output_dir=${output_root} \
---model_name=mnist \
---validation_ids=${data_root}/data_splits/MNIST_val.csv \
---in_ids=${data_root}/data_splits/MNIST_test.csv \
---out_ids=${data_root}/data_splits/MNIST_test.csv,${data_root}/data_splits/MNIST_vflip_test.csv,${data_root}/data_splits/MNIST_hflip_test.csv \
---is_grayscale=1 \
---beta_schedule=scaled_linear_beta \
---beta_start=0.0015 \
---beta_end=0.0195 \
---num_inference_steps=100 \
---inference_skip_factor=4 \
---run_val=1 \
---run_in=1 \
---run_out=1
+python reconstruct.py --output_dir=${output_root} --model_name=mnist --validation_ids=${data_root}/data_splits/MNIST_val.csv --in_ids=${data_root}/data_splits/MNIST_test.csv --out_ids=${data_root}/data_splits/MNIST_test.csv,${data_root}/data_splits/MNIST_vflip_test.csv,${data_root}/data_splits/MNIST_hflip_test.csv --is_grayscale=1 --beta_schedule=scaled_linear_beta --beta_start=0.0015 --beta_end=0.0195 --num_inference_steps=100 --inference_skip_factor=4 --run_val=1 --run_in=1 --run_out=1
 ```
 The arg `inference_skip_factor` controls the amount of t starting points that are skipped during reconstruction.
 This table shows the relationship between values of `inference_skip_factor` and the number of reconstructions, as needed
@@ -94,9 +55,7 @@ or a subset of the in/out datasets with `--first_n=1000`
 
 ### Classify samples as OOD
 ```bash
-python ood_detection.py \
---output_dir=${output_root} \
---model_name=mnist
+python ood_detection.py --output_dir=${output_root} --model_name=mnist
 ```
 
 ## Citations

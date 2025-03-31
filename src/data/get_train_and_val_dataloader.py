@@ -3,6 +3,7 @@ import pandas as pd
 import torch.distributed as dist
 from monai import transforms
 from monai.data import CacheDataset, Dataset, ThreadDataLoader, partition_dataset
+from monai.utils import set_determinism
 
 
 def get_data_dicts(ids_path: str, shuffle: bool = False, first_n=False):
@@ -40,6 +41,9 @@ def identity_transform(x):
 # Also fixes issue with multithreading
 def select_first_channel(x):
     return x[0, None, ...]
+
+# Fixes issue with seed out of bounds
+set_determinism(seed=64)
 
 def get_training_data_loader(
     batch_size: int,
