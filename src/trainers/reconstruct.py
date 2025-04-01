@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import torch
 import torch.distributed as dist
 import torch.nn.functional as F
@@ -97,7 +96,7 @@ class Reconstruct(BaseTrainer):
 
         self.model.eval()
         with torch.no_grad():
-            for batch_idx, batch in enumerate(loader):
+            for batch in loader:
                 pndm_scheduler = PNDMScheduler(
                     num_train_timesteps=1000,
                     skip_prk_steps=True,
@@ -127,13 +126,6 @@ class Reconstruct(BaseTrainer):
                 images = self.vqvae_model.encode_stage_2_inputs(images_original)
                 if self.do_latent_pad:
                     images = F.pad(input=images, pad=self.latent_pad, mode="constant", value=0)
-                
-                # Solo guardar para la primera imagen del primer lote
-                if batch_idx == 0:
-                    save_images = True
-                else:
-                    save_images = False
-                
                 # loop over different values to reconstruct from
                 for t_start in pndm_start_points:
                     with autocast(enabled=True):
@@ -149,11 +141,6 @@ class Reconstruct(BaseTrainer):
                             )
                         else:
                             noise = torch.randn_like(images).to(self.device)
-                        
-                        # Save noise image for the first image in the batch
-                        if save_images:
-                            noise_image = noise[0].cpu().numpy()
-                            plt.imsave(f"images/noise_t{t_start}.png", noise_image[0], cmap="gray")
 
                         reconstructions = pndm_scheduler.add_noise(
                             original_samples=images * self.b_scale,
@@ -170,18 +157,6 @@ class Reconstruct(BaseTrainer):
                             reconstructions, _ = pndm_scheduler.step(
                                 model_output, step, reconstructions
                             )
-
-                            # Save intermediate reconstructions for the first image in the batch
-                            if save_images:
-                                recon_image = reconstructions[0].cpu().numpy()
-                                plt.imsave(f"images/reconstruction_t{t_start}_step{step}.png", recon_image[0], cmap="gray")
-                    
-                    # Decoding the reconstructions and saving the final reconstruction
-                    if save_images:
-                        final_reconstruction = self.vqvae_model.decode_stage_2_outputs(reconstructions)
-                        final_reconstruction = final_reconstruction[0].cpu().numpy()
-                        plt.imsave(f"images/final_reconstruction_t{t_start}.png", final_reconstruction[0], cmap="gray")
-
                     # try clamping the reconstructions
                     if self.do_latent_pad:
                         reconstructions = F.pad(
@@ -229,11 +204,9 @@ class Reconstruct(BaseTrainer):
                                 "mse": mse_metric[b].item(),
                             }
                         )
-                    # Only save images for the first image in the batch
-                    if save_images:
-                        break
                     # plot
                     if not dist.is_initialized():
+                        import matplotlib.pyplot as plt
 
                         n_rows = min(images.shape[0], 8)
                         fig, ax = plt.subplots(n_rows, 2, figsize=(2, n_rows))
