@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import torch
 import torch.distributed as dist
 import torch.nn.functional as F
@@ -233,7 +234,6 @@ class Reconstruct(BaseTrainer):
                         break
                     # plot
                     if not dist.is_initialized():
-                        import matplotlib.pyplot as plt
 
                         n_rows = min(images.shape[0], 8)
                         fig, ax = plt.subplots(n_rows, 2, figsize=(2, n_rows))
