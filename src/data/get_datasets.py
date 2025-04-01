@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 from sklearn.model_selection import train_test_split
-from torchvision.datasets import CIFAR10, MNIST, SVHN, FashionMNIST
+from torchvision.datasets import CIFAR10, MNIST, SVHN, FashionMNIST, KMNIST
 
 
 def parse_args():
@@ -32,6 +32,17 @@ def download_datasets(data_root):
     FashionMNIST(data_root, download=True)
     for set in ["train", "test"]:
         dataset = FashionMNIST(root=data_root, train=True if set == "train" else False)
+        out_dir = Path(dataset.raw_folder).parent / "numpy" / set
+        out_dir.mkdir(parents=True, exist_ok=True)
+        for i in range(len(dataset)):
+            img, _ = dataset[i]
+            img_np = np.array(img)
+            np.save(out_dir / f"{dataset.__class__.__name__}_{i}.npy", img_np)
+
+    # dataset KMNIST
+    KMNIST(data_root, download=True)
+    for set in ["train", "test"]:
+        dataset = KMNIST(root=data_root, train=True if set == "train" else False)
         out_dir = Path(dataset.raw_folder).parent / "numpy" / set
         out_dir.mkdir(parents=True, exist_ok=True)
         for i in range(len(dataset)):
