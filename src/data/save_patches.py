@@ -65,11 +65,12 @@ def compute_w_loader(
         print_every=5, 
         custom_downsample=1,
         custom_transforms=None,
-        target_patch_size=-1
+        target_patch_size=-1,
+        dataset_name='',
+        split='train'
     ):
-    """
-    Extrae parches de una WSI y los guarda como archivos .npy.
-    """
+
+
     dataset = Whole_Slide_Bag_FP(
         file_path=file_path, 
         wsi=wsi, 
@@ -83,18 +84,24 @@ def compute_w_loader(
         print('processing {}: total of {} batches'.format(file_path, len(loader)))
 
     wsi_name = os.path.splitext(os.path.basename(file_path))[0]
+    all_patches = []
 
     for count, (batch, coords) in enumerate(loader):    
         if count % print_every == 0:
             print('batch {}/{}, {} files processed'.format(count, len(loader), count * batch_size))
         batch_np = batch.cpu().numpy()
-        for i in range(batch_np.shape[0]):
-            x_coord, y_coord = coords[i]
-            patch_name = f"{wsi_name}_{x_coord}_{y_coord}.npy"
-            patch_dir = os.path.join("dataset",wsi_name.upper(), "numpy")
-            os.makedirs(patch_dir, exist_ok=True)
-            patch_path = os.path.join(patch_dir, patch_name)
-            np.save(patch_path, batch_np[i])
+        all_patches.append(batch_np)
+        # Limita el número de parches a 10,000
+        if sum([arr.shape[0] for arr in all_patches]) >= 10000:
+            break
+
+    # Concatenar todos los parches y limitar a 10,000
+    all_patches = np.concatenate(all_patches, axis=0)[:10000]
+
+    patch_dir = os.path.join("dataset", dataset_name, "numpy", split)
+    os.makedirs(patch_dir, exist_ok=True)
+    patch_path = os.path.join(patch_dir, f"{wsi_name}.npy")
+    np.save(patch_path, all_patches)
 
 parser = argparse.ArgumentParser(description='Patch Extraction')
 parser.add_argument('--data_h5_dir', type=str, default=None)
@@ -104,6 +111,7 @@ parser.add_argument('--csv_path', type=str, default=None)
 parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--custom_downsample', type=int, default=1)
 parser.add_argument('--target_patch_size', type=int, default=-1)
+parser.add_argument('--dataset_name', type=str, default='CAMELYON16')
 
 args = parser.parse_args()
 
@@ -135,6 +143,11 @@ if __name__ == '__main__':
         if slide_id + '.h5' not in coords_files:
             print(f'No coords for {slide_id}, skipped.')
             continue
+        
+        if slide_id.startswith('test_'):
+            split = 'test'
+        else:
+            split = 'train'
 
         time_start = time.time()
         wsi = openslide.open_slide(slide_file_path)
@@ -146,12 +159,11 @@ if __name__ == '__main__':
             print_every=20,
             custom_downsample=args.custom_downsample,
             custom_transforms=None,
-            target_patch_size=args.target_patch_size
+            target_patch_size=args.target_patch_size,
+            dataset_name=args.dataset_name,
+            split=split
         )
         time_elapsed = time.time() - time_start
         print('\npatch extraction for {} took {} s'.format(slide_id, time_elapsed))
 
     print('Finished!')
-
-
-
