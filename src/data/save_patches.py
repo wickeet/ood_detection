@@ -237,7 +237,7 @@ def compute_w_loader(
 		for i in range(batch_np.shape[0]):
 			x_coord, y_coord = coords[i]
 			patch_name = f"{wsi_name}_{x_coord}_{y_coord}.npy"
-			patch_path = os.path.join(output_path, patch_name)
+			patch_path = os.path.join(wsi_name.upper(), "numpy", patch_name)
 			np.save(patch_path, batch_np[i])
 	
 	return output_path
