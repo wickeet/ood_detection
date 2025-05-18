@@ -8,10 +8,10 @@ import pdb
 import time
 from datasets.dataset_h5 import Dataset_All_Bags, Whole_Slide_Bag_FP
 from torch.utils.data import DataLoader
-from models.resnet_custom import resnet50_baseline as resnet50_clam
+from .models.resnet_custom import resnet50_baseline as resnet50_clam
 import argparse
-from utils.utils import print_network, collate_features
-from utils.file_utils import save_hdf5
+from .utils.utils import print_network, collate_features
+from .utils.file_utils import save_hdf5
 from PIL import Image
 import timm
 import h5py
