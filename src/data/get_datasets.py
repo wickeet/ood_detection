@@ -86,7 +86,7 @@ def create_train_test_splits(data_root):
     splits_dir.mkdir(exist_ok=True, parents=True)
 
     # Creating splits between train and val for datasets
-    for dataset in ["FashionMNIST", "MNIST", "CIFAR10", "SVHN"]:
+    for dataset in ["FashionMNIST", "MNIST", "CIFAR10", "SVHN", "CAMELYON16"]:
         numpy_data_root = Path(data_root) / dataset / "numpy"
         train_and_val_list = list((numpy_data_root / "train").glob("*"))
         train_list, val_list = train_test_split(train_and_val_list, test_size=0.05, random_state=42)
