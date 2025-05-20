@@ -57,6 +57,12 @@ print(device)
 # Comando válido
 # CUDA_VISIBLE_DEVICES=0,1 nohup python src/data/save_patches.py --data_slide_dir=/data/datasets/CAMELYON16/original/images/ --data_h5_dir=/data/datasets/CAMELYON16/patches_256_preset/coords/ --csv_path=/data/datasets/CAMELYON16/original/train_test.csv --batch_size=512 --target_patch_size=256 > cam_features_clam.out 2>&1 &
 
+saved_patches = {'train': 0, 'test': 0}
+saved_patches_tumor = 0
+saved_patches_normal = 0
+MAX_PATCHES = 10000
+MAX_PATCHES_TIPO = 5000
+
 def compute_w_loader(
         file_path, 
         wsi,
@@ -84,24 +90,38 @@ def compute_w_loader(
         print('processing {}: total of {} batches'.format(file_path, len(loader)))
 
     wsi_name = os.path.splitext(os.path.basename(file_path))[0]
-    all_patches = []
+    patch_dir = os.path.join("dataset", dataset_name, "numpy", split)
+    os.makedirs(patch_dir, exist_ok=True)
 
-    for count, (batch, coords) in enumerate(loader):    
+    is_tumor = wsi_name.startswith('tumor_')
+    is_normal = wsi_name.startswith('normal_')
+
+    for count, (batch, coords) in enumerate(loader):	
+        if saved_patches[split] >= MAX_PATCHES:
+            break
+        if is_tumor and saved_patches_tumor >= MAX_PATCHES_TIPO:
+            break
+        if is_normal and saved_patches_normal >= MAX_PATCHES_TIPO:
+            break
         if count % print_every == 0:
             print('batch {}/{}, {} files processed'.format(count, len(loader), count * batch_size))
         batch_np = batch.cpu().numpy()
-        all_patches.append(batch_np)
-        # Limita el número de parches a 10,000
-        if sum([arr.shape[0] for arr in all_patches]) >= 10000:
-            break
-
-    # Concatenar todos los parches y limitar a 10,000
-    all_patches = np.concatenate(all_patches, axis=0)[:10000]
-
-    patch_dir = os.path.join("dataset", dataset_name, "numpy", split)
-    os.makedirs(patch_dir, exist_ok=True)
-    patch_path = os.path.join(patch_dir, f"{wsi_name}.npy")
-    np.save(patch_path, all_patches)
+        for i in range(batch_np.shape[0]):
+            if saved_patches[split] >= MAX_PATCHES:
+                break
+            if is_tumor and saved_patches_tumor >= MAX_PATCHES_TIPO:
+                break
+            if is_normal and saved_patches_normal >= MAX_PATCHES_TIPO:
+                break
+            x_coord, y_coord = coords[i]
+            patch_name = f"{wsi_name}_{x_coord}_{y_coord}.npy"
+            patch_path = os.path.join(patch_dir, patch_name)
+            np.save(patch_path, batch_np[i])
+            saved_patches[split] += 1
+            if is_tumor:
+                saved_patches_tumor += 1
+            if is_normal:
+                saved_patches_normal += 1
 
 parser = argparse.ArgumentParser(description='Patch Extraction')
 parser.add_argument('--data_h5_dir', type=str, default=None)
