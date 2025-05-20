@@ -76,7 +76,7 @@ def compute_w_loader(
         split='train'
     ):
 
-
+    global saved_patches, saved_patches_tumor, saved_patches_normal
     dataset = Whole_Slide_Bag_FP(
         file_path=file_path, 
         wsi=wsi, 
