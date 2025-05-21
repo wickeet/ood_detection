@@ -56,6 +56,7 @@ print(device)
 
 # Comando válido
 # CUDA_VISIBLE_DEVICES=0,1 nohup python src/data/save_patches.py --data_slide_dir=/data/datasets/CAMELYON16/original/images/ --data_h5_dir=/data/datasets/CAMELYON16/patches_256_preset/coords/ --csv_path=/data/datasets/CAMELYON16/original/train_test.csv --batch_size=512 --target_patch_size=256 > cam_features_clam.out 2>&1 &
+# CUDA_VISIBLE_DEVICES=0,1 nohup python src/data/save_patches.py --data_slide_dir=/data/datasets/PANDA/PANDA_original/original/train_images/ --data_h5_dir=/data/datasets/PANDA/PANDA_original/patches_64_preset/coords/ --csv_path=/data/datasets/PANDA/PANDA_original/original/train.csv --batch_size=512 --target_patch_size=64 --slide_ext=.tiff --split=train > panda_features_64.out 2>&1 &
 
 saved_patches = {'train': 0, 'test': 0}
 saved_patches_tumor = 0
@@ -132,6 +133,7 @@ parser.add_argument('--batch_size', type=int, default=512)
 parser.add_argument('--custom_downsample', type=int, default=1)
 parser.add_argument('--target_patch_size', type=int, default=-1)
 parser.add_argument('--dataset_name', type=str, default='CAMELYON16')
+parser.add_argument('--split', type=str, default='train')
 
 args = parser.parse_args()
 
@@ -166,8 +168,10 @@ if __name__ == '__main__':
         
         if slide_id.startswith('test_'):
             split = 'test'
-        else:
+        elif slide_id.startswith('train_'):
             split = 'train'
+        else:
+            split = args.split
 
         time_start = time.time()
         wsi = openslide.open_slide(slide_file_path)
